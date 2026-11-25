@@ -1,0 +1,61 @@
+import { supabase } from "@/lib/supabase";
+import type { Ruang, Jenis } from "@/data/ruang";
+import {supabaseAdmin} from "@/lib/supabase-admin";
+import type {JadwalPublik} from "@/data/peminjaman";
+
+// Daftar ruang aktif. Kalau jenis diisi, saring berdasarkan jenis.
+export async function ambilRuang(jenis: Jenis | null): Promise<Ruang[]> {
+  let query = supabase
+    .from("ruang")
+    .select("id, nama, jenis, kapasitas, lokasi, aktif")
+    .eq("aktif", true)
+    .order("nama");
+
+  if (jenis) query = query.eq("jenis", jenis);
+  const { data, error } = await query;
+  if (error) throw new Error("Gagal memuat ruang: " + error.message);
+  return data as Ruang[];
+}
+
+// Satu ruang berdasarkan id. Hasilnya null kalau id aneh atau tidak ada.
+export async function ambilRuangById(id: number): Promise<Ruang | null> {
+  if (!Number.isInteger(id) || id < 1) return null;
+  const { data, error } = await supabase
+    .from("ruang")
+    .select("id, nama, jenis, kapasitas, lokasi, aktif")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) throw new Error("Gagal memuat ruang: " + error.message);
+  return data as Ruang | null;
+}
+
+
+// Jadwal yang sudah disetujui untuk satu ruang, tanpa kolom peminjam (data pribadi).
+export async function ambilJadwalRuang(ruangId: number): Promise<JadwalPublik[]> {
+    if (!Number.isInteger(ruangId) || ruangId < 1) return [];
+    const { data, error } = await supabaseAdmin
+      .from("peminjaman")
+      .select("id, ruang_id, keperluan, tanggal, mulai, selesai")
+      .eq("ruang_id", ruangId)
+      .eq("status", "disetujui")
+      .order("tanggal")
+      .order("mulai");
+  
+    if (error) throw new Error("Gagal memuat jadwal: " + error.message);
+    return data as unknown as JadwalPublik[];
+}
+
+// Semua jadwal yang sudah disetujui
+export async function ambilJadwalDisetujui(): Promise<JadwalPublik[]> {
+  const { data, error } = await supabaseAdmin
+    .from("peminjaman")
+    .select("id, ruang_id, keperluan, tanggal, mulai, selesai, ruang(nama)")
+    .eq("status", "disetujui")
+    .order("tanggal")
+    .order("mulai");
+
+  if (error) throw new Error("Gagal memuat jadwal: " + error.message);
+  return data as unknown as JadwalPublik[];
+}
+
