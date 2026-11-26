@@ -6,6 +6,7 @@ import { jamKeMenit } from "@/lib/format";
 
 export type HasilAjukan = {
   berhasil: boolean;
+  nomor?: number;
   pesan: string;
   galat: {
     ruang?: string;
@@ -139,7 +140,8 @@ export async function ajukanPeminjaman(
 
   return {
     berhasil: true,
-    pesan: `Permohonan #${baru.id} tersimpan. Simpan nomor ini untuk cek status.`,
+    nomor: baru.id,
+    pesan: "Permohonan berhasil diajukan.",
     galat: {},
     isian: { ...isian, peminjam: "", keperluan: "", tanggal: "", mulai: "", selesai: "", jumlah: "" },
   };
