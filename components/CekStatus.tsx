@@ -29,6 +29,14 @@ export default function CekStatus({
                     className="block w-full rounded border px-3 py-2"
                 />
             </div>
+            <div>
+                <label className="mb-1 block text-sm font-medium">Nama peminjam</label>
+                <input
+                    name="nama"
+                    defaultValue={nama}
+                    className="block w-full rounded border px-3 py-2"
+                />
+                </div>
             <button className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"> Cek Status</button>
             </form>
 
