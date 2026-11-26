@@ -53,7 +53,7 @@ export default async function DetailRuang({
 
       {ruang.aktif ? (
         <Link
-          href="/pinjam"
+        href={`/pinjam?ruang=${ruang.id}`}
           className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Ajukan peminjaman
