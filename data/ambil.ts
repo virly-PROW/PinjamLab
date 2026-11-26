@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import type { Ruang, Jenis } from "@/data/ruang";
 import {supabaseAdmin} from "@/lib/supabase-admin";
-import type {JadwalPublik} from "@/data/peminjaman";
+import type {JadwalPublik, Peminjaman} from "@/data/peminjaman";
 
 // Daftar ruang aktif. Kalau jenis diisi, saring berdasarkan jenis.
 export async function ambilRuang(jenis: Jenis | null): Promise<Ruang[]> {
@@ -78,5 +78,30 @@ export async function ambilBentrok(
 
     if (error) throw new Error("Gagal memeriksa bentrok:" + error.message);
     return (data ?? []).length > 0;
+}
+
+// cek status nomor dan peminjaman harus cocok
+export async function cekStatus(
+  id: number,
+  nama: string
+): Promise<Peminjaman | null> {
+  if (!Number.isInteger(id) || id < 1) return null;
+  const namaBersih = nama.trim().toLowerCase();
+  if (namaBersih === "") return null;
+
+  const {data, error} = await supabaseAdmin
+    .from("peminjaman")
+    .select(
+      "id, ruang_id, peminjam, keperluan, tanggal, mulai, selesai, jumlah_orang, status, alasan_tolak, dibuat, ruang(nama)"
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+    if (error) throw new Error("Gagal memeriksa status: " + error.message);
+    if (!data) return null;
+
+    if (data.peminjam.trim().toLowerCase() !== namaBersih) return null;
+    return data as unknown as Peminjaman;
+  
 }
 
