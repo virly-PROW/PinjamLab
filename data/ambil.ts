@@ -59,3 +59,24 @@ export async function ambilJadwalDisetujui(): Promise<JadwalPublik[]> {
   return data as unknown as JadwalPublik[];
 }
 
+// mengecek apakah ada jadwal disetujui di ruang dan tangga; yang sama dengan jam tunpnag tindih
+export async function ambilBentrok(
+  ruangId: number,
+  tanggal: string,
+  mulai: string,
+  selesai: string
+) : Promise<boolean> {
+  const {data, error} = await supabaseAdmin
+    .from("peminjaman")
+    .select("id")
+    .eq("ruang_id", ruangId)
+    .eq("tanggal", tanggal)
+    .eq("status", "disetujui")
+    .lt("mulai", selesai)
+    .gt("selesai", mulai)
+    .limit(1);
+
+    if (error) throw new Error("Gagal memeriksa bentrok:" + error.message);
+    return (data ?? []).length > 0;
+}
+

@@ -12,3 +12,8 @@ export function formatTanggal(tanggal: string) {
   export function formatJam(jam: string) {
     return jam.slice(0, 5);
   }
+
+  export function jamKeMenit(jam: string) {
+    const [h, m] = jam.split(":").map(Number);
+    return h * 60 + m;
+  }
