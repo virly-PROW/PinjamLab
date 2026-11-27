@@ -27,3 +27,11 @@ export type Peminjaman = {
     dibuat: string;
     ruang: { nama: string} | null;
 };
+
+// Isi URL bisa apa saja. Hanya terima status yang dikenal, selain itu dianggap "semua".
+export function bacaStatus(nilai: string | string[] | undefined): Status | null {
+    return typeof nilai === "string" &&
+      (STATUS as readonly string[]).includes(nilai)
+      ? (nilai as Status)
+      : null;
+}

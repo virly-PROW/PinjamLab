@@ -1,7 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import type { Ruang, Jenis } from "@/data/ruang";
 import {supabaseAdmin} from "@/lib/supabase-admin";
-import type {JadwalPublik, Peminjaman} from "@/data/peminjaman";
+import type {JadwalPublik, Peminjaman, Status} from "@/data/peminjaman";
 
 // Daftar ruang aktif. Kalau jenis diisi, saring berdasarkan jenis.
 export async function ambilRuang(jenis: Jenis | null): Promise<Ruang[]> {
@@ -105,3 +105,32 @@ export async function cekStatus(
   
 }
 
+
+// seua perubahann beserta data proibadinya hanya boleh dipanggil dari halaman
+export async function ambilSemuaPermohonan(
+  status: Status | null
+): Promise<Peminjaman[]> {
+  let query = supabaseAdmin
+    .from("peminjaman")
+    .select(
+      "id, ruang_id, peminjam, keperluan, tanggal, mulai, selesai, jumlah_orang, status, alasan_tolak, dibuat, ruang(nama)"
+    )
+    .order("id", { ascending: false});
+
+  if (status) query = query.eq("status", status);
+
+  const {data, error} = await query;
+  if (error) throw new Error("Gagal memuat permohonan: " + error.message);
+  return data as unknown as Peminjaman[];
+}
+
+// Semua ruang termasuk yang nonaktif, untuk halaman kelola ruang (admin).
+export async function ambilSemuaRuang(): Promise<Ruang[]> {
+  const { data, error } = await supabaseAdmin
+    .from("ruang")
+    .select("id, nama, jenis, kapasitas, lokasi, aktif")
+    .order("nama");
+
+  if (error) throw new Error("Gagal memuat ruang: " + error.message);
+  return data as Ruang[];
+}
